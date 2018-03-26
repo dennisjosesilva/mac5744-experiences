@@ -113,7 +113,6 @@ namespace mac5744
     return cameraMatrix;
   }
 
-
   /* ========================= Camera Matrix ============================================================== */
   QMatrix4x4 Camera::cameraMatrix()
   {
