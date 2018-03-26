@@ -37,7 +37,8 @@
                 "${workspaceRoot}",
                 "/usr/include/x86_64-linux-gnu/qt5/QtGui",
                 "/usr/include/x86_64-linux-gnu/qt5",
-                "${workspaceRoot}/include"
+                "${workspaceRoot}/include",
+                "/usr/include/x86_64-linux-gnu/qt5/QtCore"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

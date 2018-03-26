@@ -69,13 +69,13 @@ namespace mac5744
     inline const std::shared_ptr<QMatrix4x4> orientation() const { return _orientation; }
     inline std::shared_ptr<QMatrix4x4> orientation() { return _orientation; }
 
-    void pointAt(const QVector3D& target, const QVector3D& up = QVector3D{0.0, 1.0, 0.0});
+    void pointAt(const QVector3D& target, const QVector3D &up = QVector3D{0.0f, 1.0f, 0.0f});
     void lookAt(const QVector3D& direction, const QVector3D &up);
     
     QMatrix4x4 cameraMatrixOriginal();
     QMatrix4x4 cameraMatrix();
 
-    std::shared_ptr<QMatrix4x4> viewMatrix();
+    QMatrix4x4 viewMatrix();
     std::shared_ptr<QMatrix4x4> projectionMatrix();
 
   private:

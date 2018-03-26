@@ -40,7 +40,7 @@ namespace mac5744
     _farDistance = camera.farDistance();
 
     _projectionMatrix = camera.projectionMatrix();
-    _viewMatrix = camera.viewMatrix();
+    _viewMatrix = std::make_shared<QMatrix4x4>(camera.viewMatrix());
     _orientation = camera.orientation();
     _rotation = camera.rotation();
 
@@ -71,12 +71,12 @@ namespace mac5744
     if (_lens == plens) {
       if (adjust) {
         if (_lens == Perspective)
-          _height = 2.0 * _focalDistance * tanf(radian(_fovy / 2.0f));
+          _height = 2.0 * _focalDistance * tanf(qDegreesToRadians(_fovy / 2.0f));
         else {
-          _direction = _orientation * QVector3D{0.0f, 0.0f, -1.0f};
-          auto focalPoint = _position + _focalDistance * _direction;
-          _focalDistance = (_height / 2.0f) / tanf(randian(_fovy / 2.0f))
-          _position = focalPoint - _focalDistance * _direction;
+          auto direction = (*_orientation) * QVector3D{0.0f, 0.0f, -1.0f};
+          auto focalPoint = (*_position) + _focalDistance * direction;
+          _focalDistance = (_height / 2.0f) / qTan(qDegreesToRadians(_fovy / 2.0f));
+          (*_position) = focalPoint - _focalDistance * direction;
         }
       }
       _lens = plens;
@@ -84,7 +84,64 @@ namespace mac5744
   }
 
   /* ========================  Point At ============================================================== */
-  void pointAt(const QVector3D& target, const QVector3D& up)
-  {}
-  
+  void Camera::pointAt(const QVector3D &target, const QVector3D &up)
+  {
+    _focalDistance = (target - (*_position)).length();
+    auto direction = (target - (*_position)).normalized();
+    lookAt(direction, up.normalized());
+  }
+
+  /* ===================== LookAt ====================================================================== */
+  void Camera::lookAt(const QVector3D& direction, const QVector3D &up)
+  {
+    auto z = -direction;
+    auto x = QVector3D::crossProduct(up, z);
+    auto y = QVector3D::crossProduct(z, x);
+    _orientation = std::make_shared<QMatrix4x4>(
+      x[0], x[1], x[2], 0.0f,
+      y[0], y[1], y[2], 0.0f,
+      z[0], z[1], z[2], 0.0f,
+      0.0f, 0.0f, 0.0f, 1.0f);
+  }
+
+  /* ===================== Camera Matrix Original ========================================================= */
+  QMatrix4x4 Camera::cameraMatrixOriginal()
+  {
+    QMatrix4x4 cameraMatrix;
+    cameraMatrix *= (*_orientation);
+    cameraMatrix.translate(*_position);
+    return cameraMatrix;
+  }
+
+
+  /* ========================= Camera Matrix ============================================================== */
+  QMatrix4x4 Camera::cameraMatrix()
+  {
+    QMatrix4x4 cameraMatrix;
+    cameraMatrix *= (*_orientation);
+    cameraMatrix.rotate(*_rotation);
+    cameraMatrix.translate(*_position);
+    return cameraMatrix;
+  }
+
+  /* =============================== View Matrix ========================================================== */
+  QMatrix4x4 Camera::viewMatrix()
+  {
+    return cameraMatrix().inverted();
+  }
+
+  /* =================================== Projection Matrxi ================================================ */
+  std::shared_ptr<QMatrix4x4> Camera::projectionMatrix()
+  {
+    _projectionMatrix->setToIdentity();
+    if (_lens == Orthographic) {
+      auto xradius = 0.5 * _height * _aspectRatio;
+      auto yradius = 0.5 * _height;
+      _projectionMatrix->ortho(-xradius, xradius, -yradius, yradius, _nearDistance, _farDistance);
+    } 
+    else
+      _projectionMatrix->perspective(_fovy, _aspectRatio, _nearDistance, _farDistance);
+    
+    return _projectionMatrix;
+  }
 }
