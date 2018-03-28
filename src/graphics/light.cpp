@@ -18,4 +18,9 @@ namespace mac5744
     _specularColor{pspecularColor},
     _attenuation{pattenuation}
   {}
+
+  QVector4D Light::position() const
+  {
+    return QVector4D((*_position)[0], (*_position)[1], (*_position)[2], 1 - (float)_directional);
+  }
 }

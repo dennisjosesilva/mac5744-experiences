@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <QVector3D>
+#include <QVector4D>
 #include <QObject>
 
 namespace mac5744
